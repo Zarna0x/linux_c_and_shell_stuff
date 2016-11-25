@@ -1,2 +1,2 @@
 # shell_stuff
-fun with bash
+fun with bash/C
