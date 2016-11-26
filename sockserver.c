@@ -86,7 +86,8 @@ int main () {
 void* connection_handler(void* sock_arg) {
    // get socket descriptor
    int sock_t = *(int *)sock_arg;
-   char* msg;
+   int read_size;
+   char* msg, client_message[2000];
 
    // Send some message;
    msg = "Hello, I am your connection handler";
@@ -95,6 +96,23 @@ void* connection_handler(void* sock_arg) {
     msg = "Its my duty to communicate with you";
     write(sock_t , msg , strlen(msg));
 
+
+     // Receive message from client
+    while ((read_size = recv(sock_t,client_message,2000,0)) > 0) {
+           // be tutiyushi ;d
+
+           write(sock_t,client_message,strlen(client_message));
+    }
+
+   if(read_size == 0)
+    {
+        puts("Client disconnected");
+        fflush(stdout);
+    }
+    else if(read_size == -1)
+    {
+        perror("recv failed");
+    }
     //Free the socket pointer
     free(sock_arg);
 }
