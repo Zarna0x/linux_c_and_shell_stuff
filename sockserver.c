@@ -5,9 +5,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
+#include <pthread.h>
+
+void* connection_handler(void*);
+
 int main () {
-  int sock;
+  int sock, *new_sock_ptr;
   struct sockaddr_in server,client;
+  char *message;
 
   sock = socket(AF_INET,SOCK_STREAM,0);
 
@@ -46,9 +51,21 @@ int main () {
      char *client_ip = inet_ntoa(client.sin_addr);
      int client_port = ntohs(client.sin_port);
 
-    printf("%s connected from port %d\n\n\n\n\n",client_ip,client_port);
-    int * messg = "Hello Client, you have received your connection\n\n\n";
-    write(new_sock,messg,strlen(messg));
+     printf("%s connected from port %d\n\n\n\n\n",client_ip,client_port);
+
+        message = "Hello Client , I have received your connection. And now I will assign a handler for you\n";
+        write(new_sock , message , strlen(message));
+
+       pthread_t sniffer_thread; //thread ID tid
+
+        new_sock_ptr = malloc(1);//void pointer
+       *new_sock_ptr = new_sock;
+      // create thread;
+     if (pthread_create(&sniffer_thread,NULL,connection_handler, (void*)new_sock_ptr ) < 0) {
+
+            perror("could not create thread");
+            return 1;
+     }
 
 
   }
@@ -63,4 +80,21 @@ int main () {
 
 
   return 0;
+}
+
+
+void* connection_handler(void* sock_arg) {
+   // get socket descriptor
+   int sock_t = *(int *)sock_arg;
+   char* msg;
+
+   // Send some message;
+   msg = "Hello, I am your connection handler";
+   write(sock_t,msg,strlen(msg));
+
+    msg = "Its my duty to communicate with you";
+    write(sock_t , msg , strlen(msg));
+
+    //Free the socket pointer
+    free(sock_arg);
 }
